@@ -112,6 +112,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //#include <libdbg.h>
 #include "vmouse.h"
 #include <stdlib.h>
+#include <stdio.h> // printf()
 
 #define SPEW_ANAL Spew
 
@@ -191,7 +192,15 @@ static errtype grow_save_under(short x, short y)
 	int sz = MAPSIZE(x,y);
 	if (SaveUnder.mapsize >= sz) return ERR_NOEFFECT;
 
-	DebugString("SaveUnder needs to be increased!");	//¥¥¥
+   // Clear out old SaveUnder
+   if(SaveUnder.mapsize > 0) {
+      free(SaveUnder.bm.bits);
+   }
+
+   // Grow bigger than we actually need so that this doesn't happen all the time
+   int newsize = sz * 2;
+   SaveUnder.bm.bits = (uchar *)malloc(newsize);
+   SaveUnder.mapsize = newsize;
 	return OK;
 }
 
@@ -390,10 +399,10 @@ errtype ui_init_cursors(void)
 {
    errtype err;
    // Spew(DSRC_UI_Cursors ,("ui_init_cursors()\n"));
-   // KLC grow_save_under(STARTING_SAVEUNDER_WD,STARTING_SAVEUNDER_HT);
+   grow_save_under(STARTING_SAVEUNDER_WD,STARTING_SAVEUNDER_HT);
    // KLC - just initalize it to a sizeable bitmap, and leave it that way.
-   SaveUnder.bm.bits = (uchar *)malloc(6144);
-   SaveUnder.mapsize = 6144;
+   //SaveUnder.bm.bits = (uchar *)malloc(6144);
+   //SaveUnder.mapsize = 6144;
 
    LastCursor = NULL;
    MouseLock = 0;
@@ -764,6 +773,13 @@ MouseLock = 0;
 errtype uiMakeBitmapCursor(LGCursor* c,grs_bitmap* bm, LGPoint hotspot)
 {
    // Spew(DSRC_UI_Cursors,("uiMakeBitmapCursor(%x,%x,<%d %d>)\n",c,bm,hotspot.x,hotspot.y));
+
+   if(c == NULL) {
+      printf("FIXME uiMakeBitmapCursor tried to make a null cursor!\n");
+      return ERR_NOEFFECT;
+   }
+   
+   printf("uiMakeBitmapCursor %i %i\n", bm->w, bm->h);
    grow_save_under(bm->w,bm->h);
    c->func = bitmap_cursor_drawfunc;
    c->state = bm;

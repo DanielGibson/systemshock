@@ -65,6 +65,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "player.h"
 #include "physics.h"
 
+#include <stdint.h>
 #include <sdl.h>
 
 extern uchar game_paused;		// I've learned such bad lessons from LG.
@@ -77,7 +78,7 @@ extern uchar startup_music;
 //--------------------
 WindowPtr			gMainWindow;
 MenuHandle		gMainMenus[kNumMenus];
-RgnHandle			gCursorRgn;
+//RgnHandle			gCursorRgn;
 short				gCursorSet;
 bool				gDone = false;
 bool				gInForeground = true;
@@ -118,11 +119,11 @@ errtype CheckFreeSpace(short	checkRefNum);
 //------------------------------------------------------------------------------------
 //		Main function.
 //------------------------------------------------------------------------------------
-void main(void)
+int main(int argc, char** argv)
 {  
 	InitMac();																// init mac managers
 				
-	FlushEvents(autoKey+keyDown+mouseDown,0L);		// get rid of any extra mouse/key clicks
+	//FlushEvents(autoKey+keyDown+mouseDown,0L);		// get rid of any extra mouse/key clicks
  
 	GetFolders();															// get refs to data, sound, etc folders.
 
@@ -146,12 +147,12 @@ void main(void)
 	HideMenuBar();
 
 	init_all();
-	if (gShockPrefs.prefPlayIntro)
+	/*if (gShockPrefs.prefPlayIntro)
 	{
 		PlayIntroCutScene();
 		gShockPrefs.prefPlayIntro = 0;
 		SavePrefs(kPrefsResID);
-	}
+	}*/
 	
 	printf("Showing title screen\n");
 	SetupTitleScreen();
@@ -184,6 +185,8 @@ void main(void)
 	//PaintRect(&gMainWindow->portRect);
 	
 //	CleanupAndExit();			ETS patch does this now.
+
+	return 0;
 }
 
 //------------------------------------------------------------------------------------
@@ -880,10 +883,10 @@ void ShockGameLoop(void)
 		
 		chg_set_flg(_static_change);
 
-		MousePollProc();		// update the cursor, was 35 times/sec originally
+		//MousePollProc();		// update the cursor, was 35 times/sec originally
 		status_bio_update();	// draw the biometer
 
-		uint8* keyboard = SDL_GetKeyboardState(NULL);
+		uint8_t* keyboard = SDL_GetKeyboardState(NULL);
 		if (keyboard[SDL_SCANCODE_P])
 			physics_running = !physics_running;
 
@@ -1257,8 +1260,8 @@ void InitSDL()
 	gActiveWide = 640;
 	gActiveHigh = 480;
 
-	SetRect(&gActiveArea, gActiveLeft, gActiveTop, gActiveWide+gActiveLeft, gActiveHigh+gActiveTop);
-	SetRect(&gOffActiveArea, 0, 0, gActiveWide, gActiveHigh);
+	//SetRect(&gActiveArea, gActiveLeft, gActiveTop, gActiveWide+gActiveLeft, gActiveHigh+gActiveTop);
+	//SetRect(&gOffActiveArea, 0, 0, gActiveWide, gActiveHigh);
 
 	gr_init();
 
